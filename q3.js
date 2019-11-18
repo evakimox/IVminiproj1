@@ -1,16 +1,14 @@
 function question3() {
     let aidRawData = store.aid;
-    //console.log(aidRawData);
     let aggByPurpose = groupByPurpose(aidRawData);
-    console.log(aggByPurpose)
-
-    for(let i = 0; i < 5; i++){
+    for(let i=0; i<5; i++){
+        let purposeCode = aggByPurpose[i].purpose;
+        let purposeData = extractPurpose(aidRawData,purposeCode);
+        console.log(purposeData);
         let explainPosition = "q3w" + (i+1).toString();
-        document.getElementById(explainPosition).innerHTML = "purpose " + (i+1).toString();
-        //drawMap3(store.geoJSON, aggByPurpose, i);
+        document.getElementById(explainPosition).innerHTML = purposeData.purposeName;
+        drawMap3(store.geoJSON, purposeData, i);
     }
-
-
 }
 
 function drawMap3(geoJson, dataSet, hueIndex) {
