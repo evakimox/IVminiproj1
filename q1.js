@@ -1,71 +1,175 @@
-function question1(){
-    let aidRawData = store.aid;
-    let aggAsDonor = groupByCountry(aidRawData, 'd');
-    let aggAsRecepient = groupByCountry(aidRawData, 'r');
-    drawGroupedColumnChart(aggAsDonor, aggAsRecepient);
-}
+function question1() {
+    let data = q1DataPrep(store.aid);
 
-function drawGroupedColumnChart(set1, set2){
-    let config = q1Config();
-    let scales = q1Scales(set1, set2, config);
-    drawBars(set1, set2, scales, config);
-}
 
-function q1Config(){
-    let width = 600;
-    let height = 400;
-    let margin = {
-        top: 10,
-        bottom: 50,
-        left: 100,
-        right: 10
-    }
-    let bodyHeight = height - margin.top - margin.bottom;
-    let bodyWidth = width - margin.left - margin.right;
-    let container = d3.select("#q1");
-    container.attr("width", width);
-    container.attr("height", height);
-    return {width, height, margin, bodyHeight, bodyWidth, container}
-}
+    let svg = d3.select("#q1"),
+        margin = {top: 20, right: 20, bottom: 100, left: 40},
+        width = +svg.attr("width") - margin.left - margin.right,
+        height = +svg.attr("height") - margin.top - margin.bottom,
+        g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-function q1Scales(set1, set2, config){
-    let {bodyWidth, bodyHeight} = config;
-    let maximum1 = d3.max(set1);
-    let maximum2 = d3.max(set2);
-    let maximum = Math.max(maximum1.amount, maximum2.amount);
-    let names = [];
-    for(let i = 0; i < set1.length; i++){
-        let row = set1[i];
-        if(!names.includes(row.country)){
-            names.push(row.country);
+    // The scale spacing the groups:
+    let x0 = d3.scaleBand()
+        .rangeRound([0, width])
+        .paddingInner(0.1);
+
+    // The scale for spacing each group's bar:
+    let x1 = d3.scaleBand()
+        .padding(0.05);
+
+    let y = d3.scaleLinear()
+        .rangeRound([height, 0]);
+
+    let z = d3.scaleOrdinal()
+        .range([
+            "#238b45",
+            "#d94801",
+        ]);
+    console.log(data);
+    let keys = ["donate", "receive"];
+
+    console.log('keys');
+    console.log(keys);
+    x0.domain(data.map(function (d) {
+        return d.country;
+    }));
+    x1.domain(keys).rangeRound([0, x0.bandwidth()]);
+
+    let valueMax = -Infinity;
+    for(let i = 0; i < data.length; i++){
+        let cur = data[i];
+        if(cur.donate > valueMax){
+            valueMax = cur.donate
+        }
+        if(cur.receive > valueMax){
+            valueMax = cur.receive
         }
     }
-    for(let i = 0; i < set2.length; i++){
-        let row = set2[i];
-        if(!names.includes(row.country)){
-            names.push(row.country);
+
+    y.domain([0, valueMax]).nice();
+
+    g.append("g")
+        .selectAll("g")
+        .data(data)
+        .enter().append("g")
+        .attr("class", "bar")
+        .attr("transform", function (d) {
+            return "translate(" + x0(d.country) + ",0)";
+        })
+        .selectAll("rect")
+        .data(function (d) {
+            return keys.map(function (key) {
+                return {key: key, value: d[key]};
+            });
+        })
+        .enter().append("rect")
+        .attr("x", function (d) {
+            return x1(d.key);
+        })
+        .attr("y", function (d) {
+            return y(d.value);
+        })
+        .attr("width", x1.bandwidth())
+        .attr("height", function (d) {
+            return height - y(d.value);
+        })
+        .attr("fill", function (d) {
+            return z(d.key);
+        });
+
+    g.append("g")
+        .attr("class", "axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x0))
+        .selectAll("text")
+        .style("text-anchor", "start")
+        .attr("transform", "rotate(45)");
+    ;
+
+    g.append("g")
+        .attr("class", "y axis")
+        .call(d3.axisLeft(y).ticks(null, "s"))
+        .append("text")
+        .attr("x", 2)
+        .attr("y", y(y.ticks().pop()) + 0.5)
+        .attr("dy", "0.32em")
+        .attr("fill", "#000")
+        .attr("font-weight", "bold")
+        .attr("text-anchor", "start")
+        .text("$");
+
+    let legend = g.append("g")
+        .attr("font-family", "sans-serif")
+        .attr("font-size", 10)
+        .attr("text-anchor", "end")
+        .selectAll("g")
+        .data(keys.slice().reverse())
+        .enter().append("g")
+        .attr("transform", function (d, i) {
+            return "translate(0," + i * 20 + ")";
+        });
+
+    legend.append("rect")
+        .attr("x", width - 17)
+        .attr("width", 15)
+        .attr("height", 15)
+        .attr("fill", z)
+        .attr("stroke", z)
+        .attr("stroke-width", 2)
+
+
+    legend.append("text")
+        .attr("x", width - 24)
+        .attr("y", 9.5)
+        .attr("dy", "0.32em")
+        .text(function (d) {
+            return d;
+        });
+
+
+}
+
+function q1DataPrep(rawData) {
+    console.log("q1DataPrep");
+    let donor = groupByCountry(rawData, 'd');
+    let receiver = groupByCountry(rawData, 'r');
+    let recordMap = new Map();
+    for (let key in donor) {
+        let country = donor[key].country;
+        let amount = donor[key].amount;
+        if (recordMap[country] === undefined) {
+            recordMap[country] = {};
+            recordMap[country]["country"] = country;
+            recordMap[country]["donate"] = amount;
+        } else {
+            recordMap[country]["donate"] = amount;
         }
     }
 
-    let xScale = d3.scaleBand().range([0, bodyWidth]).domain(names);
-    let yScale = d3.scaleLinear()
-        .range([0, bodyHeight])
-        .domain([0, maximum]);
+    for (let key in receiver) {
+        let country = receiver[key].country;
+        let amount = receiver[key].amount;
+        if (recordMap[country] === undefined) {
+            recordMap[country] = {};
+            recordMap[country]["country"] = country;
+            recordMap[country]["receive"] = amount;
+        } else {
+            recordMap[country]["receive"] = amount;
+        }
+    }
 
-    return {xScale, yScale};
-}
-
-function drawBars(set1, set2, scales, config){
-    let {margin, container} = config;
-    let {xScale, yScale} = scales;
-    let body = container.append("g")
-        .style("transform",
-            `translate(${margin.left}px,${margin.top}px)`
-        )
-    let bars = body.selectAll(".bar").data(set1);
-    bars.enter().append("rect")
-        .attr("width", xScale.bandwidth())
-        .attr("x", (d) => xScale(d.country))
-        .attr("height", (d) => yScale(d.amount))
-        .attr("fill", "#2a5599")
+    let recordList = [];
+    for (let key in recordMap) {
+        recordList.push(recordMap[key]);
+    }
+    recordList.sort(function (a, b) {
+            let keyA = a.donate;
+            let keyB = b.donate;
+            // Compare the 2 dates
+            if (keyA < keyB) return 1;
+            if (keyA > keyB) return -1;
+            return 0;
+        }
+    );
+    return recordList;
 }

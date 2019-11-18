@@ -36,7 +36,6 @@ function groupByCountry(data, asWho) {
             return result;
         }, {}
     );
-    result = Object.keys(result).map(key => result[key]);
     return result;
 }
 
@@ -129,34 +128,3 @@ function extractPurpose(data, purposeCode){
     }
     return filteredData;
 }
-
-
-/*
-            let shouldCreateNewEntry = false;
-            if(result[countryName] === undefined){
-                result[countryName] = [];
-                shouldCreateNewEntry = true;
-            }
-            else {
-                if(result[countryName][purposeCode] === undefined){
-                    shouldCreateNewEntry = true
-                }
-            }
-            if(shouldCreateNewEntry){
-                result[countryName][purposeCode] = {
-                    "country": d['recipient'],
-                    "amount": parseInt(d['commitment_amount_usd_constant']),
-                    "purposeName": d['coalesced_purpose_name'],
-                    "purposeCode": d['coalesced_purpose_code'],
-                }
-            }
-            else {
-                let currentData = result[countryName][purposeCode];
-                let prevAmt = currentData.amount;
-                let newAmt = parseInt(d['commitment_amount_usd_constant']);
-                let sum = prevAmt + newAmt;
-                currentData.amount = sum;
-                result[countryName][purposeCode] = currentData;
-            }
-            return result;
-*/
