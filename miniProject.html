@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="d3.js"></script>
+    <script src="q1.js"></script>
+    <script src="q2.js"></script>
+    <script src="q3.js"></script>
+    <script src="toolFunctions.js"></script>
+    <title>Mini project</title>
+</head>
+<body>
+<h3>
+    Mini project - Jingning Zhang, jz3252
+</h3>
+<div>
+    <p>Question 1:</p>
+    <svg id="q1">
+    </svg>
+</div>
+<hr>
+<div>
+    <p>Question 2:</p>
+    <div>
+        <div style="display: inline-block">
+            <svg id="q2l1">
+            </svg>
+        </div>
+        <div style="display: inline-block">
+            <svg id="q2m1">
+            </svg>
+        </div>
+        <p>country as donor</p>
+    </div>
+    <div>
+        <div style="display: inline-block">
+            <svg id="q2l2">
+            </svg>
+        </div>
+        <div style="display: inline-block">
+            <svg id="q2m2">
+            </svg>
+        </div>
+        <p>country as recipient</p>
+    </div>
+</div>
+<hr>
+<div>
+    <p>Question 3:</p>
+    <div style="display: inline-block">
+        <div style="display: inline-block">
+            <svg id="q3l1"></svg>
+        </div>
+        <div style="display: inline-block">
+            <svg id="q3m1"></svg>
+        </div>
+        <div id="q3w1"></div>
+    </div>
+    <div style="display: inline-block">
+        <div style="display: inline-block">
+            <svg id="q3l2"></svg>
+        </div>
+        <div style="display: inline-block">
+            <svg id="q3m2"></svg>
+        </div>
+        <div id="q3w2"></div>
+    </div>
+    <div style="display: inline-block">
+        <div style="display: inline-block">
+            <svg id="q3l3"></svg>
+        </div>
+        <div style="display: inline-block">
+            <svg id="q3m3"></svg>
+        </div>
+        <div id="q3w3"></div>
+    </div>
+    <div style="display: inline-block">
+        <div style="display: inline-block">
+            <svg id="q3l4"></svg>
+        </div>
+        <div style="display: inline-block">
+            <svg id="q3m4"></svg>
+        </div>
+        <div id="q3w4"></div>
+    </div>
+    <div style="display: inline-block">
+        <div style="display: inline-block">
+            <svg id="q3l5"></svg>
+        </div>
+        <div style="display: inline-block">
+            <svg id="q3m5"></svg>
+        </div>
+        <div id="q3w5"></div>
+    </div>
+</div>
+
+<script>
+    let store = {
+        aid: []
+    };
+
+    loadData().then(
+        () => {
+            question1();
+            question2();
+            question3();
+        }
+    );
+
+    function loadData() {
+        return Promise.all([
+            d3.csv('aiddata.csv'),
+            d3.json('countries.geo.json')
+        ]).then(
+            (datasets) => {
+                store['aid'] = datasets[0];
+                store['geoJSON'] = datasets[1];
+                return store;
+            }
+        )
+    }
+
+
+</script>
+
+</body>
+</html>
